@@ -164,7 +164,7 @@ def main(args=None):
     """
     parser = argparse.ArgumentParser(description="YOLO Sheep Follower")
     parser.add_argument("--id", type=str, default="3", 
-                       help="ID of the sheep to follow (or "sheep" to follow any sheep)")
+                       help="ID of the sheep to follow (or \"sheep\" to follow any sheep)")
     
     rclpy.init(args=args)
     

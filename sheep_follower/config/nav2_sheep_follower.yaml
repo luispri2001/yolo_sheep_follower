@@ -1,0 +1,12 @@
+# Nav2 Sheep Follower Configuration
+
+nav2_sheep_follower:
+  ros__parameters:
+    # Navigation parameters
+    target_frame: "map"                    # Target coordinate frame
+    lost_timeout: 2.0                      # Timeout before considering sheep lost (s)
+    goal_tolerance: 0.5                    # Min distance between goals (m)
+    goal_offset: 1.0                       # Distance to maintain from sheep (m)
+    
+    # ROS parameters
+    use_sim_time: true                     # Use simulation time
