@@ -1,10 +1,10 @@
-# TIGRE - Sheep Following System
+# Sheep Following System
 
 This repository contains two ROS2 nodes for following sheep using YOLO object detection. The system provides two different approaches: high-level navigation using Nav2 and low-level velocity control.
 
 ## Overview
 
-The TIGRE (Tracking Intelligent Grazing Robot Environment) system implements autonomous sheep following capabilities for robotic applications in agricultural and research environments. It uses YOLO-based 3D object detection to identify and track specific sheep by ID or any sheep in the field.
+This system implements autonomous sheep following capabilities for robotic applications in agricultural and research environments. It uses YOLO-based 3D object detection to identify and track specific sheep by ID or any sheep in the field.
 
 ## Components
 
@@ -28,10 +28,10 @@ A high-level navigation approach that uses the Nav2 navigation stack to follow s
 #### Usage
 ```bash
 # Follow sheep with ID "3"
-ros2 run tigre nav2_sheep_follower.py --id 3
+ros2 run sheep_follower nav2_sheep_follower.py --id 3
 
 # Follow any sheep
-ros2 run tigre nav2_sheep_follower.py --id sheep
+ros2 run sheep_follower nav2_sheep_follower.py --id sheep
 ```
 
 #### Architecture
@@ -57,67 +57,3 @@ A low-level approach that directly controls robot velocity using `cmd_vel` comma
 - `max_follow_distance` (default: 5.0m): Maximum following distance
 - `center_threshold` (default: 30 pixels): Tolerance for centering target
 - `lost_object_timeout` (default: 2.0s): Time before stopping when target lost
-
-#### Usage
-```bash
-# Follow sheep with ID "3"
-ros2 run tigre sheep_follower.py --id 3
-
-# Follow any sheep
-ros2 run tigre sheep_follower.py --id sheep
-```
-
-#### Control Logic
-- **Linear velocity**: Based on distance to target (approach/retreat/maintain)
-- **Angular velocity**: Combination of 3D lateral offset and 2D image centering
-- **Safety**: Automatic stop when target lost or invalid data received
-
-## Dependencies
-
-### ROS2 Packages
-- `rclpy`: ROS2 Python client library
-- `geometry_msgs`: For Twist and PoseStamped messages
-- `nav2_msgs`: For NavigateToPose action
-- `yolo_msgs`: Custom YOLO detection messages
-- `tf2_ros`: Transform library
-- `tf2_geometry_msgs`: Geometry message transformations
-
-### Python Packages
-- `math`: Mathematical operations
-- `time`: Time handling
-- `argparse`: Command line argument parsing
-- `numpy`: Numerical operations (sheep_follower only)
-
-## Input Topics
-
-### `/yolo/detections_3d` (yolo_msgs/DetectionArray)
-YOLO detection results containing:
-- `id`: Unique identifier for each detected object
-- `class_name`: Object class (e.g., "sheep")
-- `bbox3d.center.position`: 3D position in camera frame
-- `bbox.center.position`: 2D bounding box center in image coordinates
-
-## Output Topics
-
-### Nav2 Sheep Follower
-- **Action Client**: `/navigate_to_pose` (nav2_msgs/NavigateToPose)
-
-### Direct Velocity Sheep Follower  
-- **Publisher**: `/cmd_vel` (geometry_msgs/Twist)
-
-## Configuration
-
-### Launch Parameters
-Both nodes accept command line arguments:
-- `--id <sheep_id>`: Specific sheep ID to follow (default: "3")
-- `--id sheep`: Follow any detected sheep
-
-### ROS Parameters
-Parameters can be set via ROS parameter server or launch files:
-
-```yaml
-nav2_sheep_follower:
-  target_frame: "map"
-  lost_timeout: 2.0
-  goal_tolerance: 0.5
-```
