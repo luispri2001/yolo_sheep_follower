@@ -19,8 +19,8 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Robotica Team',
-    maintainer_email='robotica@example.com',
+    maintainer='Luis Prieto López',
+    maintainer_email='lpril@unileon.es',
     description='ROS2 package for autonomous sheep following using YOLO '
                 'detection',
     license='MIT',
