@@ -28,8 +28,8 @@ setup(
     entry_points={
         'console_scripts': [
             'nav2_sheep_follower = sheep_follower.nav2_sheep_follower:main',
-            'direct_sheep_follower = '
-            'sheep_follower.direct_sheep_follower:main',
+            'direct_sheep_follower = sheep_follower.direct_sheep_follower:main',
+            'wolf_distance_detector = sheep_follower.wolf_distance_detector:main',
         ],
     },
 )

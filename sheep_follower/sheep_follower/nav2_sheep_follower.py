@@ -70,8 +70,11 @@ class Nav2SheepFollower(Node):
         sheep_found = False
         
         for detection in msg.detections:
+            # Ensure the detection is a sheep before following
+            if detection.class_name != "sheep":
+                continue
             if str(detection.id) == self.target_id or (
-                detection.class_name == "sheep" and self.target_id == "sheep"):
+                self.target_id == "sheep"):
                 
                 sheep_found = True
                 self.found_target = True
