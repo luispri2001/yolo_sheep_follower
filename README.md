@@ -32,7 +32,7 @@ sheep_follower/
 1. Clone this repository into your ROS2 workspace:
 ```bash
 cd ~/ros2_ws/src
-git clone <repository_url> yolo_sheep_follower
+git clone https://github.com/luispri2001/yolo_sheep_follower
 ```
 
 2. Install dependencies:
@@ -171,4 +171,32 @@ You can also modify the YAML configuration files in the `config/` directory:
 ### Output Topics
 - Nav2 Sheep Follower: `/navigate_to_pose` (nav2_msgs/NavigateToPose)
 - Direct Velocity Follower: `/cmd_vel` (geometry_msgs/Twist)
+
+---
+
+### Wolf Distance Detector (`wolf_distance_detector.py`)
+
+This node detects wolves using YOLO detections and publishes both the estimated 3D distance to the wolf and a visualization. It also publishes an annotated image with the 2D bounding box and distance overlay.
+
+#### Features
+- **Wolf detection**: Identifies wolves in YOLO detection messages.
+- **Distance estimation**: Calculates and publishes the 3D distance to the detected wolf.
+- **RViz visualization**: Publishes 3D bounding box and distance as markers.
+- **Annotated image**: Publishes a camera image with the wolf's 2D bounding box and distance drawn on it.
+
+#### Topics
+- `/wolf/distance` (`std_msgs/Float32`): Distance to the detected wolf.
+- `/wolf/visualization` (`visualization_msgs/MarkerArray`): Markers for RViz.
+- `/wolf/image_detection` (`sensor_msgs/Image`): Annotated image with bounding box and distance.
+
+#### Usage
+```bash
+ros2 run sheep_follower wolf_distance_detector
+```
+
+#### Visualization
+To visualize the wolf detection and distance in RViz:
+1. Run the `wolf_distance_detector` node.
+2. In RViz, add a "Marker" display type and subscribe to the `/wolf/visualization` topic.
+3. Add a "Image" display type and subscribe to the `/wolf/image_detection` topic for annotated images.
 
