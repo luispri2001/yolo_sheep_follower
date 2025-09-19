@@ -2,6 +2,12 @@
 
 This repository contains a ROS2 package for following sheep using YOLO object detection. The system provides two different approaches: high-level navigation using Nav2 and low-level velocity control.
 
+<div align="center">
+  <a href="https://drive.google.com/file/d/1BushD_RQRCJy4ibuARQTfjgNHNZmI35j/view?usp=sharing" target="_blank">
+    <img src="https://img.shields.io/badge/▶️-Watch_Video_Demo-red?style=for-the-badge" alt="Video Demo" width="300"/>
+  </a>
+</div>
+
 ## Package Structure
 
 ```
@@ -199,4 +205,6 @@ To visualize the wolf detection and distance in RViz:
 1. Run the `wolf_distance_detector` node.
 2. In RViz, add a "Marker" display type and subscribe to the `/wolf/visualization` topic.
 3. Add a "Image" display type and subscribe to the `/wolf/image_detection` topic for annotated images.
+
+
 
