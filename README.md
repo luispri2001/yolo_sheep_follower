@@ -2,9 +2,16 @@
 
 This repository contains a ROS2 package for following sheep using YOLO object detection. The system provides two different approaches: high-level navigation using Nav2 and low-level velocity control.
 
+## Demos
 <div align="center">
   <a href="https://drive.google.com/file/d/1BushD_RQRCJy4ibuARQTfjgNHNZmI35j/view?usp=sharing" target="_blank">
-    <img src="https://img.shields.io/badge/▶️-Watch_Video_Demo-red?style=for-the-badge" alt="Video Demo" width="300"/>
+    <img src="https://img.shields.io/badge/▶️-Simulation_Demo-red?style=for-the-badge" alt="Video Demo" width="300"/>
+  </a>
+</div>
+
+<div align="center">
+  <a href="https://drive.google.com/file/d/1lewlBhPj2SrJkG1iUKibFtqL6TAkV6qo/view?usp=sharing" target="_blank">
+    <img src="https://img.shields.io/badge/▶️-Real_World_Demo-red?style=for-the-badge" alt="Video Demo" width="300"/>
   </a>
 </div>
 
