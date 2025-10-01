@@ -213,5 +213,25 @@ To visualize the wolf detection and distance in RViz:
 2. In RViz, add a "Marker" display type and subscribe to the `/wolf/visualization` topic.
 3. Add a "Image" display type and subscribe to the `/wolf/image_detection` topic for annotated images.
 
+## Cite
+
+If your work uses this repository, please cite the repository or the following paper:
+
+```bibtex
+@article{prieto2025herds,
+  title={HERDS: A ROS 2-based animal detection and herding system},
+  author={Prieto-López, Luis and Mayoko-Biong, Jean Chrysostome and Sánchez de la Fuente, Sergio and González-Santamarta, Miguel A. and Rodríguez-Lera, Francisco J. and Sánchez-González, Lidia},
+  journal={Under review},
+  year={2025},
+  note={Grant PID2024-161761OB-C21 funded by MICIU/AEI/10.13039/501100011033 and by the ERDF/EU}
+}
+```
+
+
+**Acknowledgments**
+This project has been partially funded by the Recovery, Transformation, and Resilience Plan, financed by the European Union (Next Generation), thanks to the AURORAS project, and by grant PID2024-161761OB-C21 funded by MICIU/AEI/10.13039/501100011033 and by the ERDF/EU.
+![Logo AURORAS](https://project-auroras.github.io/auroras/logos/tituloblanco.png)
+
+
 
 
