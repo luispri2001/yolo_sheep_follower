@@ -218,12 +218,21 @@ To visualize the wolf detection and distance in RViz:
 If your work uses this repository, please cite the repository or the following paper:
 
 ```bibtex
-@article{prieto2025herds,
-  title={HERDS: A ROS 2-based animal detection and herding system},
-  author={Prieto-López, Luis and Mayoko-Biong, Jean Chrysostome and Sánchez de la Fuente, Sergio and González-Santamarta, Miguel A. and Rodríguez-Lera, Francisco J. and Sánchez-González, Lidia},
-  journal={Under review},
-  year={2025},
-  note={Grant PID2024-161761OB-C21 funded by MICIU/AEI/10.13039/501100011033 and by the ERDF/EU}
+@inproceedings{herds2025,
+  title = {HERDS: A ROS 2-based animal detection and herding system},
+  author = {Luis Prieto-López and Jean Chrysostome Mayoko Biong and Sergio Sánchez de la Fuente and Miguel A. González-Santamarta and Francisco J. Rodríguez-Lera and Lidia Sánchez-González},
+  year = 2025,
+  month = {November},
+  booktitle = {Proceedings of the Eight Iberian Robotics Conference (ROBOT 2025)},
+  publisher = {IEEE Press},
+  address = {Porto, Portugal},
+  series = {Actas de la Conferencia Internacional sobre Robótica},
+  volume = 1,
+  number = 1,
+  pages = {1--6},
+  editor = {TBD},
+  organizat = {SPR, SEIDROB, FEUP, IPB, ISEP},
+  note = {Grant PID2024-161761OB-C21 funded by MICIU/AEI/10.13039/501100011033 and by the ERDF/EU}
 }
 ```
 
