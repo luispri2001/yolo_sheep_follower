@@ -1,0 +1,6 @@
+[submodule "deps/yolo_ros"]
+	path = deps/yolo_ros
+	url = https://github.com/mgonzs13/yolo_ros.git
+[submodule "deps/gps_ignition_simulation"]
+	path = deps/gps_ignition_simulation
+	url = https://github.com/luispri2001/gps_ignition_simulation.git

@@ -13,15 +13,16 @@ import argparse
 class YoloObjectFollower(Node):
     """ROS2 node for following a sheep using YOLO detections and cmd_vel commands."""
     
-    def __init__(self, target_id="3"):
+    def __init__(self, target_id="any"):
         """Initialize the YOLO object follower node.
         
         Args:
-            target_id (str): ID of the sheep to follow or "sheep" for any sheep.
+            target_id: ID of the sheep to follow or "any" for first detected sheep.
         """
         super().__init__("yolo_object_follower")
         
         self.target_id = target_id
+        self.current_sheep_id = None
         self.lost_object_timeout = 2.0
         self.last_detection_time = None
         self.found_target = False
@@ -34,7 +35,7 @@ class YoloObjectFollower(Node):
         
         self.detection_sub = self.create_subscription(
             DetectionArray,
-            "/yolo/detections_3d",
+            "/detections_3d",
             self.detection_callback_yolo,
             10
         )
@@ -56,26 +57,41 @@ class YoloObjectFollower(Node):
         """Process YOLO detections to find target sheep.
         
         Args:
-            msg (DetectionArray): YOLO detection message.
+            msg: YOLO detection message.
         """
-        for detection in msg.detections:
-            if str(detection.id) == self.target_id or (
-                detection.class_name == "sheep" and self.target_id == "sheep"):
-                
-                self.found_target = True
-                self.last_detection_time = self.get_clock().now()
-                
-                self.target_position = detection.bbox3d.center.position
-                self.target_bbox = detection.bbox
-                
-                self.get_logger().info(f"Sheep {self.target_id} detected at position: "
-                                       f"x={self.target_position.x:.2f}, "
-                                       f"y={self.target_position.y:.2f}, "
-                                       f"z={self.target_position.z:.2f}")
-                return
+        best_sheep = None
         
-        if self.found_target:
-            self.get_logger().debug(f"Sheep {self.target_id} not found in current detections")
+        for detection in msg.detections:
+            # Accept both sheep and cow (YOLO often confuses them)
+            if detection.class_name not in ["sheep", "cow"]:
+                continue
+            
+            detection_id = str(detection.id)
+            
+            if self.target_id == "any":
+                if self.current_sheep_id is None or detection_id == self.current_sheep_id:
+                    best_sheep = detection
+                    if detection_id == self.current_sheep_id:
+                        break
+                elif best_sheep is None:
+                    best_sheep = detection
+            elif detection_id == self.target_id:
+                best_sheep = detection
+                break
+        
+        if best_sheep:
+            self.found_target = True
+            self.last_detection_time = self.get_clock().now()
+            self.current_sheep_id = str(best_sheep.id)
+            
+            self.target_position = best_sheep.bbox3d.center.position
+            self.target_bbox = best_sheep.bbox
+            
+            self.get_logger().info(f"Following sheep ID {self.current_sheep_id} at: "
+                                   f"x={self.target_position.x:.2f}, "
+                                   f"y={self.target_position.y:.2f}")
+        elif self.found_target:
+            self.get_logger().debug("Sheep not found in current detections")
 
     def control_loop(self):
         """Main control loop for following behavior."""
@@ -163,8 +179,8 @@ def main(args=None):
         args: Command line arguments.
     """
     parser = argparse.ArgumentParser(description="YOLO Sheep Follower")
-    parser.add_argument("--id", type=str, default="3", 
-                       help="ID of the sheep to follow (or \"sheep\" to follow any sheep)")
+    parser.add_argument("--id", type=str, default="any", 
+                       help="ID of the sheep to follow (or 'any' for first detected)")
     
     rclpy.init(args=args)
     

@@ -1,5 +1,9 @@
 # Sheep Following System
 
+[![ROS2](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/luispri2001/yolo_sheep_follower)](https://github.com/luispri2001/yolo_sheep_follower/stargazers)
+
 This repository contains a ROS2 package for following sheep using YOLO object detection. The system provides two different approaches: high-level navigation using Nav2 and low-level velocity control.
 
 ## Demos
@@ -15,54 +19,104 @@ This repository contains a ROS2 package for following sheep using YOLO object de
   </a>
 </div>
 
-## Package Structure
+## Repository Structure
 
 ```
-sheep_follower/
-├── package.xml                    # Package manifest
-├── setup.py                       # Python package setup
-├── setup.cfg                      # Setup configuration
-├── resource/                      # Package resources
-│   └── sheep_follower
-├── sheep_follower/                # Python package directory
-│   ├── __init__.py
-│   ├── nav2_sheep_follower.py     # Nav2-based follower
-│   └── direct_sheep_follower.py   # Direct velocity follower
-├── launch/                        # Launch files
-│   ├── nav2_sheep_follower.launch.py
-│   ├── direct_sheep_follower.launch.py
-│   └── sheep_follower_complete.launch.py
-├── config/                        # Configuration files
-│   ├── nav2_sheep_follower.yaml
-│   └── direct_sheep_follower.yaml
-└── test/                          # Test files
-    ├── test_copyright.py
-    └── test_flake8.py
+yolo_sheep_follower/
+├── sheep_follower/                    # Main ROS2 package
+│   ├── package.xml
+│   ├── setup.py
+│   ├── setup.cfg
+│   ├── resource/
+│   ├── sheep_follower/                # Python source code
+│   │   ├── __init__.py
+│   │   ├── nav2_sheep_follower.py
+│   │   ├── direct_sheep_follower.py
+│   │   └── wolf_distance_detector.py
+│   ├── launch/
+│   │   ├── sheep_follower_simulation.launch.py
+│   │   ├── nav2_sheep_follower.launch.py
+│   │   └── direct_sheep_follower.launch.py
+│   └── config/
+│       ├── nav2_sheep_follower.yaml
+│       ├── direct_sheep_follower.yaml
+│       └── sheep_follower.rviz
+├── deps/                              # Git submodules
+│   ├── yolo_ros/                      # YOLO ROS2 (includes yolo_msgs)
+│   └── gps_ignition_simulation/       # Gazebo worlds & robot models
+├── logos/
+├── .gitignore
+├── .gitmodules
+├── CITATION.cff
+└── README.md
 ```
 
 ## Installation
 
-1. Clone this repository into your ROS2 workspace:
 ```bash
+# Clone with submodules
 cd ~/ros2_ws/src
-git clone https://github.com/luispri2001/yolo_sheep_follower
-```
+git clone --recursive https://github.com/luispri2001/yolo_sheep_follower.git
 
-2. Install dependencies:
-```bash
+# Install ROS dependencies
 cd ~/ros2_ws
 rosdep install --from-paths src --ignore-src -r -y
+
+# Build
+colcon build --symlink-install
+
+# Source
+source install/setup.bash
 ```
 
-3. Build the package:
+> **Note:** If you cloned without `--recursive`, run: `git submodule update --init --recursive`
+
+## Quick Start - Complete Simulation
+
+Launch the full sheep following simulation with one command:
+
 ```bash
-colcon build --packages-select sheep_follower
+ros2 launch sheep_follower sheep_follower_simulation.launch.py
 ```
 
-4. Source the workspace:
+This launches:
+- Gazebo Ignition with campus world and sheep
+- LeoRover robot
+- Nav2 navigation stack
+- YOLO 3D detection
+- Sheep follower node
+
+### Simulation Parameters
+
 ```bash
-source ~/ros2_ws/install/setup.bash
+ros2 launch sheep_follower sheep_follower_simulation.launch.py \
+  sheep_id:=any \
+  yolo_model:=yolov8m.pt \
+  yolo_device:=cuda:0 \
+  use_rviz:=true
 ```
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `sheep_id` | `any` | Target sheep ID or "any" to follow first detected |
+| `yolo_model` | `yolov8m.pt` | YOLO model to use |
+| `yolo_device` | `cuda:0` | Device for inference (cuda:0, cpu) |
+| `use_rviz` | `true` | Launch RViz with visualization |
+| `use_sim_time` | `true` | Use simulation time |
+
+> **Note:** The system accepts both "sheep" and "cow" detections since YOLO may confuse them in simulation.
+
+## Requirements
+
+- **ROS2**: Humble / Iron
+- **Python**: 3.8+
+- **OS**: Ubuntu 22.04
+
+### Dependencies (auto-installed via rosdep)
+- `nav2_msgs`, `geometry_msgs`, `tf2_ros`, `tf2_geometry_msgs`
+- `vision_msgs`, `std_msgs`, `visualization_msgs`, `sensor_msgs`
+- `cv_bridge`, `numpy`, `opencv-python`
+- `yolo_msgs` *(included as submodule)*
 
 ## Overview
 
@@ -95,8 +149,8 @@ ros2 launch sheep_follower nav2_sheep_follower.launch.py sheep_id:=3
 # Or run the node directly
 ros2 run sheep_follower nav2_sheep_follower --id 3
 
-# Follow any sheep
-ros2 run sheep_follower nav2_sheep_follower --id sheep
+# Follow any sheep (default - follows first detected and sticks with it)
+ros2 run sheep_follower nav2_sheep_follower --id any
 ```
 
 #### Architecture
@@ -131,8 +185,8 @@ ros2 launch sheep_follower direct_sheep_follower.launch.py sheep_id:=3
 # Or run the node directly
 ros2 run sheep_follower direct_sheep_follower --id 3
 
-# Follow any sheep
-ros2 run sheep_follower direct_sheep_follower --id sheep
+# Follow any sheep (default - follows first detected and sticks with it)
+ros2 run sheep_follower direct_sheep_follower --id any
 ```
 
 #### Control Logic
@@ -163,9 +217,9 @@ ros2 launch sheep_follower direct_sheep_follower.launch.py \
 ```
 
 ### Configuration Files
-You can also modify the YAML configuration files in the `config/` directory:
-- `nav2_sheep_follower.yaml`: Configuration for the Nav2-based follower
-- `direct_sheep_follower.yaml`: Configuration for the direct velocity follower
+YAML configuration files in `config/`:
+- `nav2_sheep_follower.yaml`
+- `direct_sheep_follower.yaml`
 
 ## Dependencies
 
@@ -179,7 +233,8 @@ You can also modify the YAML configuration files in the `config/` directory:
 - `vision_msgs`: Vision-related message definitions
 
 ### Input Topics
-- `/yolo/detections_3d` (yolo_msgs/DetectionArray): YOLO detection results
+- `/detections_3d` (yolo_msgs/DetectionArray): 3D YOLO detection results
+- `/tracking` (yolo_msgs/DetectionArray): YOLO tracking results with IDs
 
 ### Output Topics
 - Nav2 Sheep Follower: `/navigate_to_pose` (nav2_msgs/NavigateToPose)
@@ -192,15 +247,19 @@ You can also modify the YAML configuration files in the `config/` directory:
 This node detects wolves using YOLO detections and publishes both the estimated 3D distance to the wolf and a visualization. It also publishes an annotated image with the 2D bounding box and distance overlay.
 
 #### Features
-- **Wolf detection**: Identifies wolves in YOLO detection messages.
-- **Distance estimation**: Calculates and publishes the 3D distance to the detected wolf.
-- **RViz visualization**: Publishes 3D bounding box and distance as markers.
-- **Annotated image**: Publishes a camera image with the wolf's 2D bounding box and distance drawn on it.
+
+- **Wolf detection**: Identifies wolves in YOLO detection messages
+- **Distance estimation**: Calculates and publishes the 3D distance to the detected wolf
+- **RViz visualization**: Publishes 3D bounding box and distance as markers
+- **Annotated image**: Publishes a camera image with the wolf's 2D bounding box and distance overlay
 
 #### Topics
-- `/wolf/distance` (`std_msgs/Float32`): Distance to the detected wolf.
-- `/wolf/visualization` (`visualization_msgs/MarkerArray`): Markers for RViz.
-- `/wolf/image_detection` (`sensor_msgs/Image`): Annotated image with bounding box and distance.
+
+| Topic | Type | Description |
+|-------|------|-------------|
+| `/wolf/distance` | `std_msgs/Float32` | Distance to the detected wolf |
+| `/wolf/visualization` | `visualization_msgs/MarkerArray` | Markers for RViz |
+| `/wolf/image_detection` | `sensor_msgs/Image` | Annotated image with bounding box |
 
 #### Usage
 ```bash
@@ -213,38 +272,30 @@ To visualize the wolf detection and distance in RViz:
 2. In RViz, add a "Marker" display type and subscribe to the `/wolf/visualization` topic.
 3. Add a "Image" display type and subscribe to the `/wolf/image_detection` topic for annotated images.
 
-## Cite
+## Citation
 
-If your work uses this repository, please cite the repository or the following paper:
+If you use this software, please cite the following paper:
 
 ```bibtex
 @inproceedings{herds2025,
-  title = {HERDS: A ROS 2-based animal detection and herding system},
-  author = {Luis Prieto-López and Jean Chrysostome Mayoko Biong and Sergio Sánchez de la Fuente and Miguel A. González-Santamarta and Francisco J. Rodríguez-Lera and Lidia Sánchez-González},
-  year = 2025,
-  month = {November},
+  title     = {HERDS: A ROS 2-based animal detection and herding system},
+  author    = {Prieto-L{\'o}pez, Luis and Mayoko Biong, Jean Chrysostome and 
+               S{\'a}nchez de la Fuente, Sergio and Gonz{\'a}lez-Santamarta, Miguel A. and 
+               Rodr{\'i}guez-Lera, Francisco J. and S{\'a}nchez-Gonz{\'a}lez, Lidia},
   booktitle = {Proceedings of the Eight Iberian Robotics Conference (ROBOT 2025)},
+  year      = {2025},
+  month     = {November},
   publisher = {IEEE Press},
-  address = {Porto, Portugal},
-  series = {Actas de la Conferencia Internacional sobre Robótica},
-  volume = 1,
-  number = 1,
-  pages = {1--6},
-  editor = {TBD},
-  organizat = {SPR, SEIDROB, FEUP, IPB, ISEP},
-  note = {Grant PID2024-161761OB-C21 funded by MICIU/AEI/10.13039/501100011033 and by the ERDF/EU}
+  address   = {Porto, Portugal}
 }
 ```
 
-
 ## Acknowledgments
+
 This project has been partially funded by the Recovery, Transformation, and Resilience Plan, financed by the European Union (Next Generation), thanks to the AURORAS project, and by grant PID2024-161761OB-C21 funded by MICIU/AEI/10.13039/501100011033 and by the ERDF/EU.
 
-<div style="text-align:center;">
-  <img src="https://project-auroras.github.io/auroras/logos/tituloblanco.png" alt="Logo AURORAS" width="500" style="margin-right:20px;"/>
-  <img src="logos/MICIUCofinanciadoAEI.jpg" alt="Logo Funding" width="500"/>
-</div>
-
-
-
-
+<p align="center">
+  <img src="https://project-auroras.github.io/auroras/logos/tituloblanco.png" alt="AURORAS" width="400"/>
+  <br/>
+  <img src="logos/MICIUCofinanciadoAEI.jpg" alt="Funding" width="400"/>
+</p>

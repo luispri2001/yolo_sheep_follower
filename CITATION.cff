@@ -1,0 +1,51 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Sheep Follower: ROS2 Package for Autonomous Sheep Following"
+version: 1.0.0
+date-released: 2025-12-05
+url: "https://github.com/luispri2001/yolo_sheep_follower"
+repository-code: "https://github.com/luispri2001/yolo_sheep_follower"
+license: MIT
+authors:
+  - family-names: "Prieto López"
+    given-names: "Luis"
+    email: "lpril@unileon.es"
+    affiliation: "Universidad de León"
+keywords:
+  - ROS2
+  - robotics
+  - YOLO
+  - sheep
+  - herding
+  - navigation
+  - autonomous
+  - agriculture
+abstract: >-
+  ROS2 package for autonomous sheep following using YOLO object detection.
+  Provides both Nav2-based navigation and direct velocity control approaches
+  for following specific sheep by ID in agricultural and research environments.
+references:
+  - type: conference-paper
+    authors:
+      - family-names: "Prieto-López"
+        given-names: "Luis"
+      - family-names: "Mayoko Biong"
+        given-names: "Jean Chrysostome"
+      - family-names: "Sánchez de la Fuente"
+        given-names: "Sergio"
+      - family-names: "González-Santamarta"
+        given-names: "Miguel A."
+      - family-names: "Rodríguez-Lera"
+        given-names: "Francisco J."
+      - family-names: "Sánchez-González"
+        given-names: "Lidia"
+    title: "HERDS: A ROS 2-based animal detection and herding system"
+    year: 2025
+    conference:
+      name: "Eight Iberian Robotics Conference (ROBOT 2025)"
+    location:
+      city: "Porto"
+      country: "Portugal"
+    publisher:
+      name: "IEEE Press"

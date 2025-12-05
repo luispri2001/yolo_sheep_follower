@@ -12,8 +12,8 @@ def generate_launch_description():
     # Declare launch arguments
     sheep_id_arg = DeclareLaunchArgument(
         'sheep_id',
-        default_value='3',
-        description='ID of the sheep to follow (or "sheep" for any sheep)'
+        default_value='any',
+        description='ID of the sheep to follow (or "any" for first detected)'
     )
     
     target_frame_arg = DeclareLaunchArgument(

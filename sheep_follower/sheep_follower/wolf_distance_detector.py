@@ -11,13 +11,13 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 
 class WolfDistanceDetector(Node):
-    """ROS2 node that detects wolves and publica su distancia y visualización."""
+    """ROS2 node that detects wolves and publishes distance and visualization."""
 
     def __init__(self):
         super().__init__("wolf_distance_detector")
         self.declare_parameter("wolf_id", "wolf")
         self.declare_parameter("distance_topic", "/wolf/distance")
-        self.declare_parameter("detection_topic", "/yolo/detections_3d")
+        self.declare_parameter("detection_topic", "/detections_3d")
         self.declare_parameter("visualization_topic", "/wolf/visualization")
 
         self.wolf_id = self.get_parameter("wolf_id").value

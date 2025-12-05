@@ -19,11 +19,11 @@ import argparse
 class Nav2SheepFollower(Node):
     """ROS2 node for following a sheep using Nav2 based on YOLO detections."""
     
-    def __init__(self, target_id="3"):
+    def __init__(self, target_id="any"):
         """Initialize the sheep follower node.
         
         Args:
-            target_id (str): ID of the sheep to follow or "sheep" for any sheep.
+            target_id (str): ID of the sheep to follow, or "any" to follow any sheep.
         """
         super().__init__("nav2_sheep_follower")
         self.get_logger().set_level(LoggingSeverity.DEBUG)
@@ -38,7 +38,13 @@ class Nav2SheepFollower(Node):
         self.goal_tolerance = self.get_parameter("goal_tolerance").value
         self.goal_offset = 1.0
         
-        self.get_logger().info(f"Sheep Follower - ID: {self.target_id}, Frame: {self.target_frame}")
+        # Track which sheep we're currently following
+        self.current_sheep_id = None
+        
+        if self.target_id == "any":
+            self.get_logger().info(f"Sheep Follower - Following ANY sheep, Frame: {self.target_frame}")
+        else:
+            self.get_logger().info(f"Sheep Follower - ID: {self.target_id}, Frame: {self.target_frame}")
         
         self.last_detection_time = time.time()
         self.found_target = False
@@ -49,9 +55,18 @@ class Nav2SheepFollower(Node):
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
         
-        self.detection_sub = self.create_subscription(
+        # Subscribe to YOLO 3D detections (preferred - has depth info)
+        self.detection_sub_3d = self.create_subscription(
             DetectionArray,
-            "/yolo/detections_3d",
+            "/detections_3d",  # 3D detections with depth
+            self.detection_callback,
+            10
+        )
+        
+        # Fallback to tracking (has IDs but no 3D)
+        self.detection_sub_tracking = self.create_subscription(
+            DetectionArray,
+            "/tracking",  # Tracking with consistent IDs
             self.detection_callback,
             10
         )
@@ -68,30 +83,44 @@ class Nav2SheepFollower(Node):
             msg (DetectionArray): YOLO detection message.
         """
         sheep_found = False
+        best_sheep = None
         
         for detection in msg.detections:
-            # Ensure the detection is a sheep before following
-            if detection.class_name != "sheep":
+            # Accept both sheep and cow (YOLO often confuses them in simulation)
+            if detection.class_name not in ["sheep", "cow"]:
                 continue
-            if str(detection.id) == self.target_id or (
-                self.target_id == "sheep"):
-                
-                sheep_found = True
-                self.found_target = True
-                self.last_detection_time = time.time()
-                
-                self.target_position = detection.bbox3d.center.position
-                
-                self.get_logger().debug(f"Sheep {self.target_id} detected at: "
-                                       f"x={self.target_position.x:.2f}, "
-                                       f"y={self.target_position.y:.2f}, "
-                                       f"z={self.target_position.z:.2f}")
-                
-                self.follow_sheep()
-                return
+            
+            # Check if this is the sheep we want to follow
+            detection_id = str(detection.id)
+            
+            if self.target_id == "any":
+                # Follow any sheep - prefer the one we're already following
+                if self.current_sheep_id is None or detection_id == self.current_sheep_id:
+                    best_sheep = detection
+                    if detection_id == self.current_sheep_id:
+                        break  # Found the one we're following, use it
+                elif best_sheep is None:
+                    best_sheep = detection  # Take first sheep if none selected
+            elif detection_id == self.target_id:
+                best_sheep = detection
+                break
         
-        if not sheep_found and self.found_target:
-            self.get_logger().debug(f"Sheep {self.target_id} not found in current detections")
+        if best_sheep:
+            sheep_found = True
+            self.found_target = True
+            self.last_detection_time = time.time()
+            self.current_sheep_id = str(best_sheep.id)
+            
+            self.target_position = best_sheep.bbox3d.center.position
+            
+            self.get_logger().debug(f"Following sheep ID {self.current_sheep_id} at: "
+                                   f"x={self.target_position.x:.2f}, "
+                                   f"y={self.target_position.y:.2f}, "
+                                   f"z={self.target_position.z:.2f}")
+            
+            self.follow_sheep()
+        elif self.found_target:
+            self.get_logger().debug(f"Sheep not found in current detections")
 
     def follow_sheep(self):
         """Calculate and send navigation goal based on sheep position."""
@@ -207,14 +236,18 @@ class Nav2SheepFollower(Node):
     def check_sheep_timeout(self):
         """Check if sheep has been lost for too long."""
         if not self.found_target:
-            self.get_logger().debug(f"Waiting for sheep ID {self.target_id}...")
+            if self.target_id == "any":
+                self.get_logger().debug("Waiting for any sheep...")
+            else:
+                self.get_logger().debug(f"Waiting for sheep ID {self.target_id}...")
             return
             
         elapsed = time.time() - self.last_detection_time
         if elapsed > self.lost_timeout:
-            self.get_logger().warn(f"Sheep lost for {elapsed:.1f}s. Continuing to last goal.")
+            self.get_logger().warn(f"Sheep {self.current_sheep_id} lost for {elapsed:.1f}s. Looking for new sheep.")
             self.last_goal = None
             self.found_target = False
+            self.current_sheep_id = None  # Allow following a different sheep
 
 
 def main(args=None):
@@ -224,8 +257,8 @@ def main(args=None):
         args: Command line arguments.
     """
     parser = argparse.ArgumentParser(description="Nav2 Sheep Follower")
-    parser.add_argument("--id", type=str, default="3",
-                       help="ID of the sheep to follow (or 'sheep' to follow any sheep)")
+    parser.add_argument("--id", type=str, default="any",
+                       help="ID of the sheep to follow (or 'any' to follow any sheep)")
 
     rclpy.init(args=args)
     
